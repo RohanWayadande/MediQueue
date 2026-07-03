@@ -3,14 +3,23 @@ from flask_cors import CORS
 import firebase_admin
 from firebase_admin import credentials, db, auth
 from datetime import datetime
+import os
+import json
 
 app = Flask(__name__)
 CORS(app)
 
 # ---------------- Firebase Init ----------------
-cred = credentials.Certificate("serviceAccountKey.json")
-
 if not firebase_admin._apps:
+
+    if os.path.exists("serviceAccountKey.json"):
+        # Local computer
+        cred = credentials.Certificate("serviceAccountKey.json")
+    else:
+        # Render
+        firebase_json = json.loads(os.environ["FIREBASE_CREDENTIALS"])
+        cred = credentials.Certificate(firebase_json)
+
     firebase_admin.initialize_app(cred, {
         "databaseURL": "https://hospital-57fc8-default-rtdb.firebaseio.com"
     })
