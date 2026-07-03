@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Choose Plan</title>
+
+<style>
+body{
+    margin:0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #004792, #0077cc);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+
+.container{
+    text-align:center;
+    width:90%;
+}
+
+h1{
+    color:white;
+    margin-bottom:40px;
+}
+
+.plans{
+    display:flex;
+    justify-content:center;
+    gap:25px;
+    flex-wrap:wrap;
+}
+
+.card{
+    background:white;
+    width:260px;
+    padding:30px;
+    border-radius:12px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.2);
+    transition:0.3s;
+}
+
+.card:hover{
+    transform:translateY(-6px);
+}
+
+.price{
+    font-size:30px;
+    font-weight:bold;
+    margin:15px 0;
+}
+
+.duration{
+    color:#666;
+    margin-bottom:20px;
+}
+
+.select-btn{
+    padding:10px 20px;
+    border:none;
+    border-radius:6px;
+    background:#004792;
+    color:white;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.select-btn:hover{
+    background:#003366;
+}
+
+.loader{
+    margin-top:20px;
+    color:white;
+    display:none;
+    font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>Select Your Plan</h1>
+
+    <div class="plans">
+
+        <div class="card">
+            <h2>Basic</h2>
+            <div class="price">₹200</div>
+            <div class="duration">1 Month Access</div>
+            <button class="select-btn" onclick="createPayment(2, 30)">
+                Choose Plan
+            </button>
+        </div>
+
+        <div class="card">
+            <h2>Standard</h2>
+            <div class="price">₹1000</div>
+            <div class="duration">6 Months Access</div>
+            <button class="select-btn" onclick="createPayment(1000, 180)">
+                Choose Plan
+            </button>
+        </div>
+
+        <div class="card">
+            <h2>Premium</h2>
+            <div class="price">₹2000</div>
+            <div class="duration">1 Year Access</div>
+            <button class="select-btn" onclick="createPayment(2000, 365)">
+                Choose Plan
+            </button>
+        </div>
+
+    </div>
+
+    <div class="loader" id="loader">
+        Generating Payment Link...
+    </div>
+
+</div>
+
+<script>
+
+function createPayment(amount, durationDays){
+
+    // Save selected plan duration locally
+    localStorage.setItem("selectedPlanDays", durationDays);
+
+    document.getElementById("loader").style.display = "block";
+
+    fetch('https://flaskserver-3c3s.onrender.com/create-payment-link', {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json' },
+        body: JSON.stringify({ amount })
+    })
+    .then(res => res.json())
+    .then(data => {
+
+        console.log("Backend response:", data);
+
+        if(data.link_url){
+            // Redirect user to Cashfree payment page
+            window.location.href = data.link_url;
+        }else{
+            alert("Error creating payment link");
+            document.getElementById("loader").style.display = "none";
+        }
+
+    })
+    .catch(err=>{
+        console.error("Error:", err);
+        alert("Server error");
+        document.getElementById("loader").style.display = "none";
+    });
+}
+
+</script>
+
+</body>
+</html>

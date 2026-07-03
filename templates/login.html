@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hospital Auth System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        *{
+            box-sizing:border-box;
+            margin:0;
+            padding:0;
+            font-family:Arial;
+        }
+
+        body{
+            background:linear-gradient(135deg,#4facfe,#00f2fe);
+            min-height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            padding:20px;
+        }
+
+        .box{
+            width:100%;
+            max-width:420px;
+            background:white;
+            padding:25px;
+            border-radius:16px;
+            box-shadow:0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        h2{
+            text-align:center;
+            margin-bottom:15px;
+        }
+
+        .tabs{
+            display:flex;
+            gap:8px;
+            margin-bottom:20px;
+        }
+
+        .tabs button{
+            flex:1;
+            padding:12px;
+            border:none;
+            border-radius:8px;
+            background:#ddd;
+            cursor:pointer;
+            font-weight:bold;
+        }
+
+        input{
+            width:100%;
+            padding:12px;
+            margin:7px 0;
+            border:1px solid #ccc;
+            border-radius:8px;
+        }
+
+        button.action{
+            width:100%;
+            padding:12px;
+            margin-top:12px;
+            border:none;
+            border-radius:8px;
+            background:#4facfe;
+            color:white;
+            font-size:16px;
+            cursor:pointer;
+        }
+
+        .section{
+            display:none;
+        }
+
+        .active{
+            display:block;
+        }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <div class="tabs">
+        <button onclick="showSection('register')">Register</button>
+        <button onclick="showSection('login')">Login</button>
+        <button onclick="showSection('forgot')">Forgot</button>
+    </div>
+
+    <!-- Register -->
+    <div id="register" class="section active">
+        <h2>Hospital Register</h2>
+        <input id="hospitalId" placeholder="Hospital ID">
+        <input id="hospitalName" placeholder="Hospital Name">
+        <input id="adminName" placeholder="Admin Name">
+        <input id="regEmail" placeholder="Admin Email">
+        <input id="regPassword" type="password" placeholder="Password">
+        <button class="action" onclick="register()">Register</button>
+    </div>
+
+    <!-- Login -->
+    <div id="login" class="section">
+        <h2>Login</h2>
+        <input id="loginEmail" placeholder="Email">
+        <input id="loginPassword" type="password" placeholder="Password">
+        <button class="action" onclick="login()">Login</button>
+    </div>
+
+    <!-- Forgot -->
+    <div id="forgot" class="section">
+        <h2>Forgot Password</h2>
+        <input id="forgotEmail" placeholder="Email">
+        <button class="action" onclick="resetPassword()">Reset Password</button>
+    </div>
+</div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+
+import {
+  getDatabase,
+  ref,
+  set
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-database.js";
+
+// Firebase Config
+const firebaseConfig = {
+  apiKey: "AIzaSyDbHoUVO_oXHCnY040sBLOiXVS6s6xJEb8",
+  authDomain: "hospital-57fc8.firebaseapp.com",
+  databaseURL: "https://hospital-57fc8-default-rtdb.firebaseio.com",
+  projectId: "hospital-57fc8",
+  storageBucket: "hospital-57fc8.firebasestorage.app",
+  messagingSenderId: "711314420912",
+  appId: "1:711314420912:web:14ec889664980679a13775"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+
+// UI
+window.showSection = function (id) {
+  document.querySelectorAll(".section").forEach(sec => {
+    sec.classList.remove("active");
+  });
+  document.getElementById(id).classList.add("active");
+};
+
+// Register
+window.register = async function () {
+  try {
+    const hospitalId = document.getElementById("hospitalId").value;
+    const hospitalName = document.getElementById("hospitalName").value;
+    const adminName = document.getElementById("adminName").value;
+    const email = document.getElementById("regEmail").value;
+    const password = document.getElementById("regPassword").value;
+
+    if (!hospitalId || !hospitalName || !adminName || !email || !password) {
+      alert("Please fill all fields");
+      return;
+    }
+
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const uid = userCredential.user.uid;
+
+    await set(ref(db, "hospitals/" + uid), {
+      hospitalId,
+      hospitalName,
+      adminName,
+      email,
+      uid
+    });
+
+    alert("Registration Successful");
+
+  } catch (error) {
+    alert(error.message);
+  }
+};
+
+// Payment Check
+function checkSubscription() {
+  const expiry = localStorage.getItem("subscriptionExpiry");
+
+  if (!expiry) {
+    window.location.href = "/payment";
+    return;
+  }
+
+  const now = new Date();
+  const expiryDate = new Date(expiry);
+
+  if (now < expiryDate) {
+    window.location.href = "/dashboard";
+  } else {
+    localStorage.removeItem("subscriptionExpiry");
+    window.location.href = "/payment";
+  }
+}
+
+// Login
+window.login = async function () {
+  try {
+    const email = document.getElementById("loginEmail").value;
+    const password = document.getElementById("loginPassword").value;
+
+    if (!email || !password) {
+      alert("Enter email and password");
+      return;
+    }
+
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const token = await userCredential.user.getIdToken();
+
+    const response = await fetch("http://127.0.0.1:5000/login", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      localStorage.setItem("uid", data.uid);
+      localStorage.setItem("hospitalId", data.hospitalId || "");
+      localStorage.setItem("hospitalName", data.hospitalName || "");
+
+      alert("Login Success");
+
+      checkSubscription(); // FIXED
+    } else {
+      alert(data.error || "Login failed");
+    }
+
+  } catch (error) {
+    alert(error.message);
+  }
+};
+
+// Reset Password
+window.resetPassword = async function () {
+  try {
+    const email = document.getElementById("forgotEmail").value;
+
+    if (!email) {
+      alert("Enter email");
+      return;
+    }
+
+    await sendPasswordResetEmail(auth, email);
+    alert("Reset Email Sent");
+
+  } catch (error) {
+    alert(error.message);
+  }
+};
+</script>
+
+</body>
+</html>

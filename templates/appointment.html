@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Book Appointment</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial;
+    background: url("https://images.unsplash.com/photo-1586773860418-d37222d8fce3") no-repeat center center/cover;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Overlay */
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.6);
+}
+
+/* Card */
+.card {
+    position: relative;
+    z-index: 2;
+    background: rgba(255,255,255,0.12);
+    backdrop-filter: blur(12px);
+    padding: 25px;
+    width: 100%;
+    max-width: 420px;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    color: white;
+    animation: fadeIn 0.6s ease-in;
+}
+
+h2 {
+    text-align: center;
+}
+
+.hospital {
+    text-align: center;
+    margin-bottom: 15px;
+    font-weight: bold;
+    color: #00d4ff;
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0;
+    border-radius: 8px;
+    border: none;
+    outline: none;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    background: #27ae60;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover {
+    background: #1e8449;
+    transform: scale(1.03);
+}
+
+@keyframes fadeIn {
+    from {opacity: 0; transform: translateY(20px);}
+    to {opacity: 1; transform: translateY(0);}
+}
+</style>
+</head>
+
+<body>
+
+<div class="overlay"></div>
+
+<div class="card">
+
+    <h2>Book Appointment</h2>
+
+    <div class="hospital">
+        {{ hospital.hospital_name }}
+    </div>
+   <form action="/book_appointment" method="POST">
+
+    <input type="hidden" name="hospital_id" value="{{ uid }}">
+
+    <select name="doctor_name" required>
+        <option value="">Select Doctor</option>
+
+        {% for doctor in hospital.doctors %}
+            <option value="{{ doctor.doctor_name }}">
+                Dr. {{ doctor.doctor_name }} - {{ doctor.specialization }}
+            </option>
+        {% endfor %}
+    </select>
+
+    <input name="patient_name" placeholder="Patient Name" required>
+
+    <select name="gender" required>
+        <option value="">Select Gender</option>
+        <option>Male</option>
+        <option>Female</option>
+        <option>Other</option>
+    </select>
+
+    <input type="number" name="age" placeholder="Age" required>
+
+    <input type="tel" name="mobile" placeholder="Mobile Number" required>
+
+    <textarea name="address" placeholder="Address" required></textarea>
+
+    <input type="date" name="appointment_date" required>
+
+    <button type="submit">Book Appointment</button>
+
+</form>
+
+</div>
+
+</body>
+</html>

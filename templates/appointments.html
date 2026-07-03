@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Appointments</title>
+
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #f4f6f9;
+    }
+
+    h1 {
+        text-align: center;
+        padding: 15px;
+        background: linear-gradient(135deg, #4facfe, #00f2fe);
+        color: white;
+        margin: 0;
+        animation: fadeDown 0.6s ease-in-out;
+    }
+
+    .container {
+        padding: 15px;
+        max-width: 1100px;
+        margin: auto;
+        overflow-x: auto;
+    }
+
+    .date-title {
+        margin-top: 25px;
+        font-size: 20px;
+        font-weight: bold;
+        color: #444;
+        border-left: 5px solid #4facfe;
+        padding-left: 10px;
+        animation: fadeIn 0.6s ease-in-out;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 12px;
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        animation: slideUp 0.4s ease-in-out;
+    }
+
+    th {
+        background: #4facfe;
+        color: white;
+        padding: 12px;
+        text-align: left;
+    }
+
+    td {
+        padding: 12px;
+        border-bottom: 1px solid #ddd;
+    }
+
+    tr:hover {
+        background: #f0f8ff;
+    }
+
+    @keyframes fadeDown {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(15px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 600px) {
+        table {
+            font-size: 13px;
+        }
+
+        th, td {
+            padding: 8px;
+        }
+    }
+</style>
+</head>
+<body>
+
+<h1>Appointments Dashboard</h1>
+
+<div class="container">
+
+{% for date, patients in grouped.items() %}
+    <div class="date-title">{{ date }}</div>
+
+    <table>
+        <tr>
+    <th>No</th>
+    <th>Name</th>
+    <th>Gender</th>
+    <th>Age</th>
+    <th>Mobile</th>
+    <th>Address</th>
+</tr>
+        {% for p in patients %}
+        <tr>
+            <tr>
+    <td>{{ p.patient_no }}</td>
+    <td>{{ p.patient_name }}</td>
+    <td>{{ p.gender }}</td>
+    <td>{{ p.age }}</td>
+    <td>{{ p.mobile }}</td>
+    <td>{{ p.address }}</td>
+</tr>
+        </tr>
+        {% endfor %}
+    </table>
+{% endfor %}
+
+</div>
+
+</body>
+</html>
